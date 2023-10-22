@@ -3,8 +3,33 @@ import { expandPhrases } from '../../expandPhrases.js';
 import { functions } from './sql.functions.js';
 import { keywords } from './sql.keywords.js';
 
+/**
+ * 根据类似正则的语法，枚举出所有可能的连续短语
+ *
+ * 变成这种
+ * [
+ *  select,
+ *  select all
+ *  select distinct
+ * ]
+ */
 const reservedSelect = expandPhrases(['SELECT [ALL | DISTINCT]']);
 
+/**
+ * 结果是
+ * [
+ *  with,
+ *  with recursive,
+ *  from,
+ *  where,
+ *  group by,
+ *  group by all,
+ *  group by distinct,
+ *  having,
+ *  window,
+ *  .....
+ * ]
+ */
 const reservedClauses = expandPhrases([
   // queries
   'WITH [RECURSIVE]',
@@ -75,13 +100,17 @@ const reservedPhrases = expandPhrases([
 
 export const sql: DialectOptions = {
   tokenizerOptions: {
+    // expandPhrase构建的短语数组
     reservedSelect,
     reservedClauses: [...reservedClauses, ...onelineClauses],
     reservedSetOperations,
     reservedJoins,
     reservedPhrases,
+    // 关键字
     reservedKeywords: keywords,
+    // 函数
     reservedFunctionNames: functions,
+    // todo ?
     stringTypes: [
       { quote: "''-qq-bs", prefixes: ['N', 'U&'] },
       { quote: "''-raw", prefixes: ['X'], requirePrefix: true },

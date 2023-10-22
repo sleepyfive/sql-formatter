@@ -1,5 +1,7 @@
 /**
  * Performs expandSinglePhrase() on array
+ *
+ * 根据语法数组，获取所有可能的sql短语
  */
 export const expandPhrases = (phrases: string[]): string[] => phrases.flatMap(expandSinglePhrase);
 
@@ -16,6 +18,12 @@ export const expandPhrases = (phrases: string[]): string[] => phrases.flatMap(ex
  *       "CREATE OR REPLACE TABLE",
  *       "CREATE OR REPLACE TEMP TABLE",
  *       "CREATE OR REPLACE TEMPORARY TABLE" ]
+ *
+ *
+ *       parsePhrase解析出一个二维数组，数组里每一行都是可以相互替代的词
+ *       buildCombinations按列构建出所有可能的短语结果
+ *
+ *       expandingSinglePhrase根据一句类正则的语法，创建出所有可能的sql短语
  */
 export const expandSinglePhrase = (phrase: string): string[] =>
   buildCombinations(parsePhrase(phrase)).map(text => text.trim());
@@ -77,6 +85,19 @@ const parsePhrase = (text: string): PhrasePart[] => {
   return result;
 };
 
+/**
+ *[
+ *  ['create', 'replace'],
+ *  ['','temp'],
+ *  ['table']
+ *]
+ *
+ * 根据同类型的单词数组，拼接出所有的可能的短语
+ * 比如
+ * create table
+ * create temp table
+ * ....
+ */
 const buildCombinations = ([first, ...rest]: PhrasePart[]): string[] => {
   if (first === undefined) {
     return [''];
